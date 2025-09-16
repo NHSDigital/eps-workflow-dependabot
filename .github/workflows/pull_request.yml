@@ -6,7 +6,7 @@ on:
 
 jobs:
   pr_title_format_check:
-    uses: NHSDigital/eps-workflow-semantic-release/.github/workflows/pr_title_check.yml@9fc951bc52832f354948a2cbc22e40be2d444a78
+    uses: NHSDigital/eps-workflow-semantic-release/.github/workflows/pr_title_check.yml@6c5d2bf097710f0f7328e671ce378ec5681f39cf
 
   dependabot-auto-approve-and-merge:
     uses: ./.github/workflows/dependabot-auto-approve-and-merge.yml
