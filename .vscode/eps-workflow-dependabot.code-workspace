@@ -1,0 +1,25 @@
+{
+    "folders": [
+        {
+            "name": "eps-workflow-dependabot",
+            "path": ".."
+        }
+    ],
+    "settings": {
+        "cSpell.dictionaries": [
+            "en-GB"
+        ],
+        "cSpell.ignorePaths": [
+            ".vscode"
+        ]
+    },
+    "extensions": {
+        "recommendations": [
+            "eamodio.gitlens",
+            "github.vscode-pull-request-github",
+            "redhat.vscode-yaml",
+            "streetsidesoftware.code-spell-checker",
+            "timonwong.shellcheck"
+        ]
+    }
+}
