@@ -12,4 +12,4 @@ jobs:
 
   tag_release:
     needs: quality_checks
-    uses: NHSDigital/eps-workflow-semantic-release/.github/workflows/tag-release.yml@9fc951bc52832f354948a2cbc22e40be2d444a78
+    uses: NHSDigital/eps-workflow-semantic-release/.github/workflows/tag-release.yml@275a3e7bc3efa0db1097c10225f8ee1cfbf5282f
