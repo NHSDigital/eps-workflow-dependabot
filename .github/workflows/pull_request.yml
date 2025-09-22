@@ -10,3 +10,6 @@ jobs:
 
   dependabot-auto-approve-and-merge:
     uses: ./.github/workflows/dependabot-auto-approve-and-merge.yml
+    secrets:
+      AUTOMERGE_APP_ID: ${{ secrets.AUTOMERGE_APP_ID }}
+      AUTOMERGE_PEM: ${{ secrets.AUTOMERGE_PEM }}
