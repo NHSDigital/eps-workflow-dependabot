@@ -2,6 +2,11 @@ name: Dependabot auto-approve
 
 on:
   workflow_call:
+    secrets:
+      AUTOMERGE_APP_ID:
+        required: true
+      AUTOMERGE_PEM:
+        required: true
 
 permissions:
   pull-requests: write
