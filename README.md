@@ -24,18 +24,31 @@ on:
   workflow_dispatch:
     inputs:
       branchPrefix:
+        description: "Branch prefix to find combinable PRs based on"
+        required: true
+        type: string
       mustBeGreen:
+        description: "Only combine PRs that are green (status is success)"
+        required: true
+        type: boolean
       combineBranchName:
+        description: "Name of the branch to combine PRs into"
+        required: true
+        type: string
       ignoreLabel:
+        description: "Exclude PRs with this label"
+        required: true
+        type: string
 
 jobs:
-    combine-dependabot-prs:
-        uses: eps-workflow-dependabot/.github/workflows/combine-dependabot-prs.yml@v1.0.0
-        with:
-            branchPrefix: ${{ github.event.inputs.branchPrefix }}
-            mustBeGreen: ${{ github.event.inputs.mustBeGreen }}
-            combineBranchName: ${{ github.event.inputs.combineBranchName }}
-            ignoreLabel: ${{ github.event.inputs.ignoreLabel }}
+  combine-dependabot-prs:
+    uses: NHSDigital/eps-workflow-dependabot/.github/workflows/combine-dependabot-prs.yml@v1.0.0
+    with:
+      branchPrefix: ${{ github.event.inputs.branchPrefix }}
+      mustBeGreen: ${{ github.event.inputs.mustBeGreen }}
+      combineBranchName: ${{ github.event.inputs.combineBranchName }}
+      ignoreLabel: ${{ github.event.inputs.ignoreLabel }}
+
 ```
 
 ### Dependabot Auto-Approve and Merge
@@ -57,5 +70,5 @@ on:
 
 jobs:
     dependabot-auto-approve-and-merge:
-        uses: eps-workflow-dependabot/.github/workflows/dependabot-auto-approve-and-merge.yml@v1.0.0
+        uses: NHSDigital/eps-workflow-dependabot/.github/workflows/dependabot-auto-approve-and-merge.yml@v1.0.0
 ```
