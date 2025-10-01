@@ -71,4 +71,7 @@ on:
 jobs:
     dependabot-auto-approve-and-merge:
         uses: NHSDigital/eps-workflow-dependabot/.github/workflows/dependabot-auto-approve-and-merge.yml@v1.0.0
+    secrets:
+      AUTOMERGE_APP_ID: ${{ secrets.AUTOMERGE_APP_ID }}
+      AUTOMERGE_PEM: ${{ secrets.AUTOMERGE_PEM }}
 ```
