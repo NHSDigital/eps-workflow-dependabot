@@ -1,17 +1,17 @@
 [project]
 python = "3.14.0"
-name = "eps-FHIR-validator-lambda"
+name = "eps-workflow-dependabot"
 
 [tool.poetry]
 version = "0.0.1-alpha"
 package-mode = false
-description = "lambda for Validation Service FHIR R4 API Definitions"
+description = "Common workflows for dependabot"
 license = "MIT"
 authors = [
     "EPS"
 ]
 readme = "README.md"
-repository = "https://github.com/NHSDigital/eps-FHIR-validator-lambda"
+repository = "https://github.com/NHSDigital/eps-workflow-dependabot"
 
 [tool.poetry.dependencies]
 python = "3.14.0"

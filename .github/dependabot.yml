@@ -12,3 +12,16 @@ updates:
       interval: "daily"
     commit-message:
       prefix: "Upgrade: [dependabot] - "
+
+  ###################################
+  # Poetry  #########################
+  ###################################
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "18:00" #UTC
+    versioning-strategy: increase
+    commit-message:
+      prefix: "Upgrade: [dependabot] - "
