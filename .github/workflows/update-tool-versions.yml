@@ -1,0 +1,156 @@
+name: Update Tool Versions
+
+on:
+    schedule:
+        # Run every Monday at 9:00 AM UTC
+        - cron: "0 9 * * 1"
+    workflow_dispatch: # Allow manual trigger
+
+permissions:
+    contents: write
+    pull-requests: write
+
+jobs:
+    check-updates:
+        runs-on: ubuntu-latest
+        outputs:
+            updates: ${{ steps.check.outputs.updates }}
+            has-updates: ${{ steps.check.outputs.has-updates }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+
+            - name: Check for tool updates
+              id: check
+              run: |
+                  chmod +x .github/scripts/check-tool-updates.sh
+                  updates=$(.github/scripts/check-tool-updates.sh)
+                  echo "updates=$updates" >> "$GITHUB_OUTPUT"
+
+                  # Check if there are any updates
+                  count=$(echo "$updates" | jq 'length')
+                  if [[ "$count" -gt 0 ]]; then
+                    echo "has-updates=true" >> "$GITHUB_OUTPUT"
+                    echo "Found $count update(s)"
+                    echo "$updates" | jq .
+                  else
+                    echo "has-updates=false" >> "$GITHUB_OUTPUT"
+                    echo "No updates found"
+                  fi
+
+    check-asdf-update:
+        runs-on: ubuntu-latest
+        outputs:
+            update: ${{ steps.check.outputs.update }}
+            has-update: ${{ steps.check.outputs.has-update }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+
+            - name: Check for asdf update
+              id: check
+              run: |
+                  chmod +x .github/scripts/check_asdf_update.sh
+                  update=$(.github/scripts/check_asdf_update.sh)
+                  echo "update=$update" >> "$GITHUB_OUTPUT"
+
+                  # Check if there is an update
+                  if [[ "$update" != "{}" ]]; then
+                    echo "has-update=true" >> "$GITHUB_OUTPUT"
+                    echo "Found asdf update"
+                    echo "$update" | jq .
+                  else
+                    echo "has-update=false" >> "$GITHUB_OUTPUT"
+                    echo "No asdf update found"
+                  fi
+
+    create-prs:
+        needs: check-updates
+        if: needs.check-updates.outputs.has-updates == 'true'
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                update: ${{ fromJson(needs.check-updates.outputs.updates) }}
+            max-parallel: 1 # Process one at a time to avoid conflicts
+            fail-fast: false # Continue even if one fails
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+
+            - name: Update tool version
+              run: |
+                  chmod +x .github/scripts/update_tool_version.sh
+                  .github/scripts/update_tool_version.sh \
+                    "${{ matrix.update.tool }}" \
+                    "${{ matrix.update.latest_version }}"
+
+            - name: Create Pull Request
+              uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  commit-message: "chore: update ${{ matrix.update.tool }} to ${{ matrix.update.latest_version }}"
+                  title: "${{ matrix.update.update_type == 'major' && '⬆️' || '🔄' }} Update ${{ matrix.update.tool }} to ${{ matrix.update.latest_version }}"
+                  body: |
+                      ## 📦 Dependency Update
+
+                      This PR updates `${{ matrix.update.tool }}` from `${{ matrix.update.current_version }}` to `${{ matrix.update.latest_version }}`.
+
+                      **Update Type:** ${{ matrix.update.update_type }} version update
+
+                      ### Changes
+                      - Updated `${{ matrix.update.tool }}` in `.tool-versions`
+
+                      ### Notes
+                      ${{ matrix.update.update_type == 'major' && '⚠️ This is a **major version** update. Please review carefully before merging.' || '✅ This is a minor/patch update and can be auto-merged if all checks pass.' }}
+
+                      ---
+                      *This PR was automatically created by the Update Tool Versions workflow.*
+                  branch: "update-${{ matrix.update.tool }}-${{ matrix.update.latest_version }}"
+                  delete-branch: true
+                  labels: |
+                      dependencies
+                      ${{ matrix.update.update_type == 'major' && 'major-update' || 'automerge' }}
+                  draft: ${{ matrix.update.update_type == 'major' }}
+
+    create-asdf-pr:
+        needs: check-asdf-update
+        if: needs.check-asdf-update.outputs.has-update == 'true'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+
+            - name: Update asdf version
+              run: |
+                  chmod +x .github/scripts/update_asdf_version.sh
+                  latest_version=$(echo '${{ needs.check-asdf-update.outputs.update }}' | jq -r '.latest_version')
+                  .github/scripts/update_asdf_version.sh "$latest_version"
+
+            - name: Create Pull Request
+              uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  commit-message: "chore: update asdf to ${{ fromJson(needs.check-asdf-update.outputs.update).latest_version }}"
+                  title: "${{ fromJson(needs.check-asdf-update.outputs.update).update_type == 'major' && '⬆️' || '🔄' }} Update asdf to ${{ fromJson(needs.check-asdf-update.outputs.update).latest_version }}"
+                  body: |
+                      ## 📦 ASDF Update
+
+                      This PR updates `asdf` from `${{ fromJson(needs.check-asdf-update.outputs.update).current_version }}` to `${{ fromJson(needs.check-asdf-update.outputs.update).latest_version }}`.
+
+                      **Update Type:** ${{ fromJson(needs.check-asdf-update.outputs.update).update_type }} version update
+
+                      ### Changes
+                      - Updated asdf version in `.tool-versions.asdf`
+
+                      ### Notes
+                      ${{ fromJson(needs.check-asdf-update.outputs.update).update_type == 'major' && '⚠️ This is a **major version** update. Please review carefully before merging.' || '✅ This is a minor/patch update and can be auto-merged if all checks pass.' }}
+
+                      ---
+                      *This PR was automatically created by the Update Tool Versions workflow.*
+                  branch: "update-asdf-${{ fromJson(needs.check-asdf-update.outputs.update).latest_version }}"
+                  delete-branch: true
+                  labels: |
+                      dependencies
+                      asdf
+                      ${{ fromJson(needs.check-asdf-update.outputs.update).update_type == 'major' && 'major-update' || 'automerge' }}
+                  draft: ${{ fromJson(needs.check-asdf-update.outputs.update).update_type == 'major' }}
