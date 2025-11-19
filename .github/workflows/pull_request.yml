@@ -24,7 +24,7 @@ jobs:
           echo "TAG_FORMAT=$TAG_FORMAT" >> "$GITHUB_OUTPUT"
 
   pr_title_format_check:
-    uses: NHSDigital/eps-workflow-semantic-release/.github/workflows/pr_title_check.yml@19981c51b9a090d2a323d5d8fcbdca3725deb466
+    uses: NHSDigital/eps-workflow-semantic-release/.github/workflows/pr_title_check.yml@8a48d90452dc39858c7d76a9eaf171dbc0180b91
   quality_checks:
     needs: [get_asdf_version]
     uses: NHSDigital/eps-workflow-quality-checks/.github/workflows/quality-checks.yml@aabc1def5fce03f01c5e5c02ca5e4aff3e7aaed6
